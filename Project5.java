@@ -68,7 +68,7 @@ public class Project5 {
         }
         return parsedTree;
     }
-    public static boolean isOperation(String s){
+    private static boolean isOperation(String s){
         if (s.equalsIgnoreCase("^")){
             throw new IllegalArgumentException("This operation is not valid.");
         }
@@ -97,7 +97,7 @@ public class Project5 {
 
         return equ(tree.getValue(), leftTree, rightTree);
     }
-    public static double equ(String op, double LeftTree, double RightTree)
+    private static double equ(String op, double LeftTree, double RightTree)
     {
         if (op.equals("+")) {
             return LeftTree + RightTree;
@@ -126,7 +126,7 @@ public class Project5 {
         equation = equation.substring(0, equation.length()-1);
         return equation;
     }
-    public static String buildEquation (bridges.base.BinTreeElement<String> tree, String equation){
+    private static String buildEquation (bridges.base.BinTreeElement<String> tree, String equation){
         if (tree == null){
             return equation;
         }
