@@ -8,105 +8,82 @@ Ankita Sahu
 CMSC256
 project5 takes in an expression and creates an expression tree, evaluates the tree, and returns an equation
  */
+
 public class Project5 {
     public static void main(String args[]) throws Exception{
         Bridges bridges = new Bridges(3, "sahua", "169589912133");
         bridges.setTitle("tree");
-        String ourExpression = " ( ( 7 + 3 ) * ( 5 - 2 ) )";
+        String ourExpression = "( ( 7 + 3 ) * ( 5 / 0 ) )";
         bridges.base.BinTreeElement<String> ourRoot = buildParseTree(ourExpression);
         bridges.setDataStructure(ourRoot);
         bridges.visualize();
+        double eval = evaluate(buildParseTree(ourExpression));
+        System.out.println(eval);
+        String equation = getEquation(buildParseTree(ourExpression));
+        System.out.println("a" + equation + "a");
     }
-    static String equation = "";
-
-    public static bridges.base.BinTreeElement<String> buildParseTree(String expression) {
-        expression = expression.replace(" ", "");
-        int index = 0;
-        BinTreeElement<String> parseTree = new BinTreeElement<>();
-        BinTreeElement<String> root = parseTree;
-        Stack<BinTreeElement<String>> listed = new Stack<>();
-        listed.push(parseTree);
-        parseTree = buildTree(expression, parseTree, root, listed, index);
-        return parseTree;
-    }
-
-    public static bridges.base.BinTreeElement<String> buildTree(String expression, BinTreeElement<String> parseTree, BinTreeElement<String> root, Stack<BinTreeElement<String>> listed, int index){
-        while (index < expression.length()) {
-            if (expression.charAt(index) == '(') { // issue w this is the fact that after calling it, it doesnt save my root
-                bridges.base.BinTreeElement<String> left = new BinTreeElement<>();
-                if(root.getLeft() == null) {
-                    root.setLeft(left);
-                    listed.push(left);
-                    root = root.getLeft();
-                    index++;
-                    return buildTree(expression, parseTree, root, listed, index);
-                } else {
-                    root.setRight(left);
-                    listed.push(left);
-                    root = root.getRight();
-                    index++;
-                    return buildTree(expression, parseTree, root, listed, index);
-                }
-            } else if (Character.isDigit(expression.charAt(index))) {
-                char insert = expression.charAt(index);
-                String sInsert = Character.toString(insert);
-                bridges.base.BinTreeElement<String> wowElement = new BinTreeElement<>(sInsert);
-                if (root.getLeft() == null) {
-                    root.setLeft(wowElement);
-                    index++;
-                    return buildTree(expression, parseTree, root, listed, index);
-                } else if (root.getRight() == null) {
-                    root.setRight(wowElement);
-                    index++;
-                    return buildTree(expression, parseTree, root, listed, index);
-                }
-                else if (isFullTree(root)){
-                    listed.pop();
-                    root = listed.peek();
-                    return buildTree(expression, parseTree, root, listed, index);
-                }
-            } else if (isOperation(expression.charAt(index))) {
-                char insert = expression.charAt(index);
-                String sInsert = Character.toString(insert);
-                root.setValue(sInsert);
-                index++;
-                return buildTree(expression, parseTree, root, listed, index);
+    public static bridges.base.BinTreeElement<String> buildParseTree(String expression){
+        if (expression == null || expression.length() == 0) {
+            return null;
+        }
+        String[] stringArr = expression.split(" ");
+        Stack<BinTreeElement<String>> nodeStack = new Stack<>();
+        int numAdded = 0;
+        for (int i = 0; i < stringArr.length; i++) {
+            if (stringArr[i].equalsIgnoreCase("(")) {
+            } else if (isOperation(stringArr[i])) {
+                bridges.base.BinTreeElement<String> newNode = new BinTreeElement<>();
+                newNode.setValue(stringArr[i]);
+                nodeStack.push(newNode);
+            } else if (stringArr[i].equalsIgnoreCase(")")) {
+                bridges.base.BinTreeElement<String> rightNode = nodeStack.pop();
+                bridges.base.BinTreeElement<String> root = nodeStack.pop();
+                bridges.base.BinTreeElement<String> leftNode = nodeStack.pop();
+                root.setLeft(leftNode);
+                root.setRight(rightNode);
+                nodeStack.push(root);
+            } else { // assumes that it has to be a num val
+                bridges.base.BinTreeElement<String> newNode = new BinTreeElement<>();
+                newNode.setValue(stringArr[i]);
+                nodeStack.push(newNode);
             }
-            else if (expression.charAt(index) == ')'){
-                if (index == expression.length()-1){
-                    if (parseTree.getValue() == null){
-                        parseTree = root;
-                        break;
-                    }
-                    break;
+        }
+        bridges.base.BinTreeElement<String> parsedTree = new BinTreeElement<>();
+        if (nodeStack.size() == 1){
+            parsedTree = nodeStack.pop();
+        }
+        else {
+            while (!nodeStack.isEmpty()) {
+                if (isOperation(nodeStack.peek().getValue())) {
+                    bridges.base.BinTreeElement<String> popped = nodeStack.pop();
+                    String theVal = popped.getValue();
+                    parsedTree.setValue(theVal);
                 }
-                if (listed.size() > 1) {
-                    bridges.base.BinTreeElement<String> temp = listed.pop();
-                    root = listed.peek();
-                    index++;
-                    return buildTree(expression, parseTree, root, listed, index);
-                }
-                else{
-                    break;
+                if (parsedTree.getRight() == null) {
+                    parsedTree.setRight(nodeStack.pop());
+                } else {
+                    parsedTree.setLeft(nodeStack.pop());
                 }
             }
         }
-        return parseTree;
+        return parsedTree;
     }
-    public static boolean isFullTree(bridges.base.BinTreeElement<String> tree){
-        return (tree.getLeft() != null && tree.getRight() != null);
-    }
-    public static boolean isLeaf(bridges.base.BinTreeElement<String> tree){
-        return (tree.getLeft() == null && tree.getRight() == null);
-    }
-    public static boolean isOperation(char s){
-        if (s == '^'){
+    public static boolean isOperation(String s){
+        if (s.equalsIgnoreCase("^")){
             throw new IllegalArgumentException("This operation is not valid.");
         }
-        if (s == '+' || s == '-' || s == '*' || s == '/' || s == '%'){
-            return true;
+        boolean isOperate = false;
+        if (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("-") || s.equalsIgnoreCase("*") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("%")){
+            isOperate = true;
         }
-        return false;
+        return isOperate;
+    }
+    public static boolean isLeaf(bridges.base.BinTreeElement<String> tree){
+        boolean isLeaf = false;
+        if (tree.getLeft() == null && tree.getRight() == null){
+            isLeaf = true;
+        }
+        return isLeaf;
     }
     public static double evaluate(bridges.base.BinTreeElement<String> tree){
         if (tree == null){
@@ -132,27 +109,36 @@ public class Project5 {
             return LeftTree * RightTree;
         }
         if (op.equals("/")) {
+            if (RightTree == 0){
+                throw new ArithmeticException();
+            }
             return LeftTree / RightTree;
+        }
+        if (op.equals("%")) {
+            return LeftTree % RightTree;
         }
 
         return 0;
     }
-
     public static String getEquation(bridges.base.BinTreeElement<String> tree){
+        String equation = "";
+        equation = buildEquation(tree, equation);
+        equation = equation.substring(0, equation.length()-1);
+        return equation;
+    }
+    public static String buildEquation (bridges.base.BinTreeElement<String> tree, String equation){
         if (tree == null){
             return equation;
         }
         if (tree.getLeft() != null){
             equation = equation + "( ";
         }
-        equation = getEquation(tree.getLeft());
+        equation = buildEquation(tree.getLeft(), equation);
         equation = equation + tree.getValue() + " ";
-        equation = getEquation(tree.getRight());
+        equation = buildEquation(tree.getRight(), equation);
         if (tree.getRight() != null){
             equation = equation + ") ";
         }
         return equation;
     }
-
-
 }
