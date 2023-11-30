@@ -72,18 +72,10 @@ public class Project5 {
         if (s.equalsIgnoreCase("^")){
             throw new IllegalArgumentException("This operation is not valid.");
         }
-        boolean isOperate = false;
-        if (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("-") || s.equalsIgnoreCase("*") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("%")){
-            isOperate = true;
-        }
-        return isOperate;
+        return (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("-") || s.equalsIgnoreCase("*") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("%"));
     }
     public static boolean isLeaf(bridges.base.BinTreeElement<String> tree){
-        boolean isLeaf = false;
-        if (tree.getLeft() == null && tree.getRight() == null){
-            isLeaf = true;
-        }
-        return isLeaf;
+        return tree.getLeft() == null && tree.getRight() == null;
     }
     public static double evaluate(bridges.base.BinTreeElement<String> tree){
         if (tree == null){
